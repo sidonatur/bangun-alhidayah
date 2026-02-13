@@ -217,6 +217,55 @@
         ></div>
       </section>
 
+      <section id="statistik" class="space-y-6">
+        <div
+          class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+        >
+          <h3 class="text-2xl font-bold flex items-center gap-2">
+            <i class="fas fa-chart-line text-emerald-600"></i> Tren Keuangan
+          </h3>
+          <div class="inline-flex bg-slate-100 p-1 rounded-xl">
+            <button
+              onclick="updateChart('all')"
+              id="btn-all"
+              class="cursor-pointer chart-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition bg-white shadow-sm text-emerald-600"
+            >
+              Semua
+            </button>
+            <button
+              onclick="updateChart('yearly')"
+              id="btn-yearly"
+              class="cursor-pointer chart-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-emerald-600"
+            >
+              Tahunan
+            </button>
+            <button
+              onclick="updateChart('monthly')"
+              id="btn-monthly"
+              class="cursor-pointer chart-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-emerald-600"
+            >
+              Bulanan
+            </button>
+            <button
+              onclick="updateChart('weekly')"
+              id="btn-weekly"
+              class="cursor-pointer chart-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-emerald-600"
+            >
+              Mingguan
+            </button>
+          </div>
+        </div>
+        <div
+          class="bg-white p-4 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm"
+        >
+          <div class="overflow-x-auto custom-scrollbar">
+            <div id="chartParent" style="min-width: 600px; height: 400px">
+              <canvas id="financeChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="ringkasan-saldo" class="space-y-6">
         <div class="flex items-center gap-2">
           <i class="fas fa-wallet text-emerald-600 text-xl"></i>
@@ -283,55 +332,6 @@
               class="mt-2 text-[10px] text-emerald-100 font-bold bg-white/20 inline-block px-2 py-0.5 rounded relative z-10"
             >
               Tampilkan Semua
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="statistik" class="space-y-6">
-        <div
-          class="flex flex-col md:flex-row md:items-center justify-between gap-4"
-        >
-          <h3 class="text-2xl font-bold flex items-center gap-2">
-            <i class="fas fa-chart-line text-emerald-600"></i> Tren Keuangan
-          </h3>
-          <div class="inline-flex bg-slate-100 p-1 rounded-xl">
-            <button
-              onclick="updateChart('all')"
-              id="btn-all"
-              class="cursor-pointer chart-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition bg-white shadow-sm text-emerald-600"
-            >
-              Semua
-            </button>
-            <button
-              onclick="updateChart('yearly')"
-              id="btn-yearly"
-              class="cursor-pointer chart-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-emerald-600"
-            >
-              Tahunan
-            </button>
-            <button
-              onclick="updateChart('monthly')"
-              id="btn-monthly"
-              class="cursor-pointer chart-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-emerald-600"
-            >
-              Bulanan
-            </button>
-            <button
-              onclick="updateChart('weekly')"
-              id="btn-weekly"
-              class="cursor-pointer chart-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold transition text-slate-500 hover:text-emerald-600"
-            >
-              Mingguan
-            </button>
-          </div>
-        </div>
-        <div
-          class="bg-white p-4 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm"
-        >
-          <div class="overflow-x-auto custom-scrollbar">
-            <div id="chartParent" style="min-width: 600px; height: 400px">
-              <canvas id="financeChart"></canvas>
             </div>
           </div>
         </div>
@@ -404,8 +404,8 @@
                 class="w-full border border-slate-100 bg-slate-50 rounded-lg px-3 py-2 text-sm outline-none"
               >
                 <option value="">Semua Transaksi</option>
-                <option value="MASUK">Masuk (Donasi Uang)</option>
-                <option value="KELUAR">Keluar (Belanja)</option>
+                <option value="MASUK">Transaksi Masuk</option>
+                <option value="KELUAR">Transaksi Keluar</option>
                 <option value="NON_TUNAI">Non-Tunai (Barang/Jasa)</option>
               </select>
             </div>
@@ -428,7 +428,7 @@
 
         <div
           id="filterSummary"
-          class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"
+          class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6"
         >
           <div
             class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4"
@@ -948,7 +948,13 @@
               },
             ],
           },
-          options: { maintainAspectRatio: false },
+          options: {
+            maintainAspectRatio: false,
+            interaction: {
+              mode: "index", // Menampilkan semua data pada indeks/tanggal yang sama
+              intersect: false,
+            },
+          },
         });
       }
 
@@ -988,8 +994,15 @@
         // Reset ke halaman 1 setiap kali filter berubah
         currentPage = 1;
 
-        // Update Statistik Mini di atas tabel
-        updateFilterSummary();
+        // TAMPILKAN summary jika filter bukan 'all'
+        const summaryElement = document.getElementById("filterSummary");
+        if (search || type || dateStart || dateEnd) {
+          summaryElement.classList.remove("hidden");
+          // Update Statistik Mini di atas tabel
+          updateFilterSummary();
+        } else {
+          summaryElement.classList.add("hidden");
+        }
 
         // Render ulang tabel
         renderTable();
@@ -1148,8 +1161,8 @@
         // 3. Reset ke halaman pertama
         currentPage = 1;
 
-        // 4. Update ringkasan filter (angka pemasukan/pengeluaran di atas tabel)
-        updateFilterSummary();
+        // SEMBUNYIKAN summary saat reset
+        document.getElementById("filterSummary").classList.add("hidden");
 
         // 5. Render ulang tabel dan grafik
         renderTable();
