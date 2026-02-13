@@ -647,23 +647,39 @@
           const data = await response.json();
 
           // 1. Data Transaksi
+          // Di dalam async function fetchData()
           const rawLaporan = data["Laporan Keuangan"] || [];
-          // Cari bagian ini di fungsi fetchData
           allTransactions = rawLaporan
-            .map((item, index) => ({
-              // Tambahkan index di sini
-              date: item["Tanggal"] ? item["Tanggal"].split("T")[0] : "",
-              note: item["Keterangan"] || "",
-              type: (item["Jenis"] || "").toUpperCase(),
-              amount: Number(item["Jumlah"]) || 0,
-              unit: item["Satuan"] || "",
-              originalIndex: index, // Simpan urutan asli dari Excel
-            }))
-            // Ubah logika sort di bawah ini
+            .map((item, index) => {
+              // Ambil tanggal mentah dari ISO string
+              const rawDate = item["Tanggal"]
+                ? new Date(item["Tanggal"])
+                : null;
+              let dateStr = "";
+
+              if (rawDate) {
+                // Geser ke WIB (tambah 7 jam) atau gunakan toLocaleDateString untuk mengambil tanggal lokal
+                // Format YYYY-MM-DD sesuai waktu lokal pengguna
+                const year = rawDate.getFullYear();
+                const month = String(rawDate.getMonth() + 1).padStart(2, "0");
+                const day = String(rawDate.getDate()).padStart(2, "0");
+                dateStr = `${year}-${month}-${day}`;
+              }
+
+              return {
+                date: dateStr,
+                note: item["Keterangan"] || "",
+                type: (item["Jenis"] || "").toUpperCase(),
+                amount: Number(item["Jumlah"]) || 0,
+                unit: item["Satuan"] || "",
+                originalIndex: index, // Simpan urutan asli spreadsheet
+              };
+            })
             .sort((a, b) => {
+              // Urutkan berdasarkan tanggal terbaru
               const dateDiff = new Date(b.date) - new Date(a.date);
               if (dateDiff !== 0) return dateDiff;
-              // Jika tanggal sama, gunakan indeks asli (angka lebih besar berarti baris lebih bawah di Excel)
+              // Jika tanggal sama, gunakan urutan asli (terbaru di Excel tampil di atas)
               return b.originalIndex - a.originalIndex;
             });
 
@@ -1072,9 +1088,13 @@
       }
       function formatDate(dateString) {
         if (!dateString) return "";
-        const date = new Date(dateString);
 
-        // Opsi untuk menampilkan Hari, Tanggal Bulan Tahun
+        // Memecah "YYYY-MM-DD" secara manual
+        const [year, month, day] = dateString.split("-").map(Number);
+
+        // Buat objek tanggal lokal (jam 12 siang agar aman dari pergeseran jam)
+        const date = new Date(year, month - 1, day, 12, 0, 0);
+
         const options = {
           weekday: "long",
           year: "numeric",
