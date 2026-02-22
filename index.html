@@ -13,7 +13,7 @@
       href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css"
       rel="stylesheet"
     />
-    <script src="asset/chart.umd.js"></script>
+    <!-- <script src="asset/chart.umd.js"></script> -->
     <script src="asset/sweetalert.js"></script>
 
     <link rel="stylesheet" type="text/css" href="asset/tailwind.css" />
@@ -217,7 +217,7 @@
         ></div>
       </section>
 
-      <section id="statistik" class="space-y-6">
+      <!-- <section id="statistik" class="space-y-6">
         <div
           class="flex flex-col md:flex-row md:items-center justify-between gap-4"
         >
@@ -264,7 +264,7 @@
             </div>
           </div>
         </div>
-      </section>
+      </section> -->
 
       <section id="ringkasan-saldo" class="space-y-6">
         <div class="flex items-center gap-2">
@@ -342,8 +342,8 @@
           class="flex flex-col md:flex-row md:items-center justify-between gap-4"
         >
           <h3 class="text-2xl font-bold flex items-center gap-2">
-            <i class="fas fa-exchange-alt text-emerald-600"></i> Catatan
-            Penerimaan & Pengeluaran
+            <i class="fas fa-exchange-alt text-emerald-600"></i> Rincian
+            Keuangan
           </h3>
           <div class="flex gap-2">
             <button
@@ -474,10 +474,10 @@
         <div
           class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-slate-100 custom-scrollbar"
         >
-          <table class="w-full text-left min-w-[700px]">
+          <table class="w-full text-left min-w-[850px]">
             <thead class="bg-slate-200/60 border-b border-slate-100">
               <tr>
-                <th class="p-4 font-semibold text-slate-800 w-[15%]">
+                <th class="p-4 font-semibold text-slate-800 w-[20%]">
                   Tanggal
                 </th>
                 <th class="p-4 font-semibold text-slate-800">Keterangan</th>
@@ -507,8 +507,7 @@
 
       <section id="arsip" class="space-y-6">
         <h3 class="text-2xl font-bold flex items-center gap-2">
-          <i class="fas fa-file-excel text-emerald-600"></i> Arsip Data
-          Transparan
+          <i class="fas fa-file-excel text-emerald-600"></i> Data Keuangan
         </h3>
 
         <div
@@ -738,7 +737,7 @@
               ${isSelesai ? '<div class="absolute top-0 right-0 bg-emerald-100 text-emerald-700 px-4 py-1 rounded-bl-xl text-xs font-bold uppercase">Selesai</div>' : ""}
               <h3 class="text-lg font-bold mb-1 ${!isSelesai ? "text-emerald-900" : ""}">${t["Nama Tahap"]}</h3>
               <div class="flex justify-between items-end mb-4">
-                <span class="${isSelesai ? "text-2xl font-bold text-slate-400 line-through" : "text-3xl font-bold text-emerald-600"}">Rp ${terkumpul.toLocaleString("id-ID")}</span>
+                <span class="${isSelesai ? "text-2xl font-bold text-slate-400 line-through" : "text-2xl md:text-3xl font-bold text-emerald-600"}">Rp ${terkumpul.toLocaleString("id-ID")}</span>
                 ${!isSelesai ? `<span class="text-slate-400 text-sm font-medium">/ Rp ${target.toLocaleString("id-ID")}</span>` : ""}
               </div>
               <div class="w-full bg-slate-100 rounded-full h-4">
@@ -901,62 +900,62 @@
 
         // 2. Render ulang grafik dengan filter waktu yang dipilih
         // Fungsi initChart Anda akan menerima parameter 'all', 'yearly', 'monthly', atau 'weekly'
-        if (typeof initChart === "function") {
-          initChart(filter);
-        }
+        // if (typeof initChart === "function") {
+        //   initChart(filter);
+        // }
       }
 
-      function initChart(filter = "all") {
-        const ctx = document.getElementById("financeChart").getContext("2d");
-        const chartParent = document.getElementById("chartParent");
-        const sortedData = [...allTransactions].sort(
-          (a, b) => new Date(a.date) - new Date(b.date),
-        );
-        const groups = {};
+      // function initChart(filter = "all") {
+      //   const ctx = document.getElementById("financeChart").getContext("2d");
+      //   const chartParent = document.getElementById("chartParent");
+      //   const sortedData = [...allTransactions].sort(
+      //     (a, b) => new Date(a.date) - new Date(b.date),
+      //   );
+      //   const groups = {};
 
-        sortedData.forEach((t) => {
-          let key = t.date;
-          if (filter === "yearly") key = t.date.substring(0, 4);
-          else if (filter === "monthly") key = t.date.substring(0, 7);
-          if (!groups[key]) groups[key] = { masuk: 0, keluar: 0 };
-          if (t.type === "MASUK") groups[key].masuk += t.amount;
-          else if (t.type === "KELUAR") groups[key].keluar += t.amount;
-        });
+      //   sortedData.forEach((t) => {
+      //     let key = t.date;
+      //     if (filter === "yearly") key = t.date.substring(0, 4);
+      //     else if (filter === "monthly") key = t.date.substring(0, 7);
+      //     if (!groups[key]) groups[key] = { masuk: 0, keluar: 0 };
+      //     if (t.type === "MASUK") groups[key].masuk += t.amount;
+      //     else if (t.type === "KELUAR") groups[key].keluar += t.amount;
+      //   });
 
-        const keys = Object.keys(groups);
-        const labels = keys;
-        const dataMasuk = keys.map((k) => groups[k].masuk);
-        const dataKeluar = keys.map((k) => groups[k].keluar);
+      //   const keys = Object.keys(groups);
+      //   const labels = keys;
+      //   const dataMasuk = keys.map((k) => groups[k].masuk);
+      //   const dataKeluar = keys.map((k) => groups[k].keluar);
 
-        if (myChart) myChart.destroy();
-        myChart = new Chart(ctx, {
-          type: "line",
-          data: {
-            labels: labels,
-            datasets: [
-              {
-                label: "Masuk",
-                data: dataMasuk,
-                borderColor: "#10b981",
-                tension: 0.4,
-              },
-              {
-                label: "Keluar",
-                data: dataKeluar,
-                borderColor: "#f43f5e",
-                tension: 0.4,
-              },
-            ],
-          },
-          options: {
-            maintainAspectRatio: false,
-            interaction: {
-              mode: "index", // Menampilkan semua data pada indeks/tanggal yang sama
-              intersect: false,
-            },
-          },
-        });
-      }
+      //   if (myChart) myChart.destroy();
+      //   myChart = new Chart(ctx, {
+      //     type: "line",
+      //     data: {
+      //       labels: labels,
+      //       datasets: [
+      //         {
+      //           label: "Masuk",
+      //           data: dataMasuk,
+      //           borderColor: "#10b981",
+      //           tension: 0.4,
+      //         },
+      //         {
+      //           label: "Keluar",
+      //           data: dataKeluar,
+      //           borderColor: "#f43f5e",
+      //           tension: 0.4,
+      //         },
+      //       ],
+      //     },
+      //     options: {
+      //       maintainAspectRatio: false,
+      //       interaction: {
+      //         mode: "index", // Menampilkan semua data pada indeks/tanggal yang sama
+      //         intersect: false,
+      //       },
+      //     },
+      //   });
+      // }
 
       function filterData() {
         const search = document
@@ -1039,12 +1038,12 @@
         tbody.innerHTML = paginatedItems
           .map(
             (item) => `
-      <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+      <tr class="hover:bg-slate-50 transition border-b border-slate-200/80">
           <td class="p-4 text-xs font-medium text-slate-600 leading-relaxed">
               ${formatDate(item.date)}
           </td>
           <td class="p-4">
-              <p class="font-bold text-slate-800">${item.note}</p>
+              <p class="text-sm font-semibold text-slate-600">${item.note}</p>
           </td>
           <td class="p-4">
               <span class="px-2 py-1 rounded-full text-[10px] font-bold ${
@@ -1057,10 +1056,10 @@
                   ${item.type}
               </span>
           </td>
-          <td class="p-4 text-right font-bold ${item.type === "MASUK" ? "text-emerald-600" : "text-rose-600"}">
+          <td class="p-4 text-right text-sm font-semibold ${item.type === "MASUK" ? "text-emerald-600" : "text-rose-600"}">
               ${item.type === "KELUAR" ? "-" : ""}Rp ${Number(item.amount).toLocaleString("id-ID")}
           </td>
-          <td class="p-4 text-right font-bold text-slate-900 bg-slate-50/50">
+          <td class="p-4 text-right text-sm font-semibold text-slate-800 bg-slate-50/50">
               Rp ${item.currentBalance.toLocaleString("id-ID")}
           </td>
       </tr>
@@ -1166,7 +1165,7 @@
 
         // 5. Render ulang tabel dan grafik
         renderTable();
-        initChart(); // Mengembalikan grafik ke tampilan awal
+        // initChart(); // Mengembalikan grafik ke tampilan awal
 
         // 6. Tutup panel filter (opsional, agar tampilan lebih bersih)
         const filterPanel = document.getElementById("filterPanel");
