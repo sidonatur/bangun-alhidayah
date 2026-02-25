@@ -129,10 +129,18 @@
       >
         Amalan Jariyah yang Tak Terputus
       </div>
-      <h2
-        class="text-3xl md:text-5xl font-extrabold mb-4 text-slate-900 leading-tight tracking-tight"
-      >
-        Pembangunan Mushola Al-Hidayah
+      <h2 class="mb-6">
+        <span
+          class="block text-3xl md:text-5xl font-extrabold text-slate-900 leading-tight tracking-tight mb-2"
+        >
+          Pembangunan Mushola Al-Hidayah
+        </span>
+        <span
+          class="inline-block px-4 py-1 bg-slate-100 text-slate-700 rounded-full text-sm md:text-base font-semibold shadow-sm border border-slate-200"
+        >
+          <i class="fa-solid fa-location-dot mr-2"></i> Jl. Sidoagung,
+          Singosari, Malang
+        </span>
       </h2>
       <p class="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
         Mari berinvestasi untuk akhirat dengan membantu mewujudkan rumah ibadah
@@ -267,9 +275,10 @@
       </section> -->
 
       <section id="ringkasan-saldo" class="space-y-6">
-        <div class="flex items-center gap-2">
-          <i class="fas fa-wallet text-emerald-600 text-xl"></i>
-          <h3 class="text-xl font-bold">Ringkasan Keuangan</h3>
+        <div class="flex">
+          <h3 class="text-2xl font-bold flex items-center gap-2">
+            <i class="fas fa-wallet text-emerald-600"></i> Ringkasan Keuangan
+          </h3>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div
@@ -518,9 +527,7 @@
               <p
                 class="text-slate-600 leading-relaxed max-w-xl text-sm md:text-base"
               >
-                Setiap donasi adalah amanah yang kami pertanggungjawabkan
-                melalui sistem pelaporan terbuka. Seluruh riwayat transaksi
-                tercatat dan
+                Seluruh riwayat transaksi keuangan tercatat dan
                 <span
                   class="text-emerald-700 font-bold underline decoration-emerald-200 decoration-4 underline-offset-2"
                   >dapat diakses publik</span
@@ -671,6 +678,7 @@
                 type: (item["Jenis"] || "").toUpperCase(),
                 amount: Number(item["Jumlah"]) || 0,
                 unit: item["Satuan"] || "",
+                saldo: item["Saldo"] || "",
                 originalIndex: index, // Simpan urutan asli spreadsheet
               };
             })
@@ -1027,29 +1035,9 @@
       function renderTable() {
         const tbody = document.getElementById("transactionBody");
 
-        // 1. Hitung Saldo Akumulatif untuk SEMUA data yang sudah difilter
-        // Kita hitung dari data terlama (indeks terakhir) ke terbaru (indeks 0)
-        let runningBalance = 0;
-
-        // Buat array baru untuk menyimpan saldo setiap baris
-        const dataWithBalance = [...filteredData]
-          .reverse() // Balik dulu untuk hitung saldo dari awal waktu
-          .map((item) => {
-            if (item.type === "MASUK") {
-              runningBalance += item.amount;
-            } else if (item.type === "KELUAR") {
-              runningBalance -= item.amount;
-            }
-            return { ...item, currentBalance: runningBalance };
-          })
-          .reverse(); // Balikkan lagi ke urutan terbaru di atas
-
         // 2. Lakukan Paginasi pada data yang sudah memiliki info saldo
         const start = (currentPage - 1) * rowsPerPage;
-        const paginatedItems = dataWithBalance.slice(
-          start,
-          start + rowsPerPage,
-        );
+        const paginatedItems = filteredData.slice(start, start + rowsPerPage);
 
         // 3. Render ke HTML
         tbody.innerHTML = paginatedItems
@@ -1077,7 +1065,7 @@
               ${item.type === "KELUAR" ? "-" : ""}Rp ${Number(item.amount).toLocaleString("id-ID")}
           </td>
           <td class="p-4 text-right text-sm font-semibold text-slate-800 bg-slate-50/50">
-              Rp ${item.currentBalance.toLocaleString("id-ID")}
+              Rp ${item.saldo.toLocaleString("id-ID")}
           </td>
       </tr>
     `,
