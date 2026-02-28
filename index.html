@@ -776,18 +776,28 @@
 
       function renderPanitia(panitia) {
         const container = document.getElementById("panitiaContainer");
+        const sectionPengurus = document.getElementById("pengurus"); // Ambil elemen section-nya
+
+        // Jika data panitia kosong atau panjang array-nya 0
+        if (!panitia || panitia.length === 0) {
+          sectionPengurus.classList.add("hidden"); // Sembunyikan seluruh section
+          return;
+        }
+
+        // Jika ada data, pastikan section tampil dan render isinya
+        sectionPengurus.classList.remove("hidden");
         container.innerHTML = panitia
           .map(
             (p) => `
-      <div class="bg-white p-6 rounded-3xl border border-slate-100 text-center shadow-sm hover:shadow-md transition">
-        <div class="w-16 h-16 bg-emerald-100 rounded-full mx-auto mb-4 flex items-center justify-center text-emerald-600 text-2xl font-bold">
-          ${p["Nama"] ? p["Nama"].charAt(0) : "?"}
-        </div>
-        <h4 class="font-bold text-base leading-tight">${p["Nama"]}</h4>
-        <p class="text-[10px] text-emerald-600 uppercase font-bold tracking-widest mt-1 mb-3">${p["Jabatan"]}</p>
-        ${p["Tugas"] ? `<p class="text-xs text-slate-500 leading-relaxed border-t pt-3">${p["Tugas"]}</p>` : ""}
-      </div>
-    `,
+          <div class="bg-white p-6 rounded-3xl border border-slate-100 text-center shadow-sm hover:shadow-md transition">
+            <div class="w-16 h-16 bg-emerald-100 rounded-full mx-auto mb-4 flex items-center justify-center text-emerald-600 text-2xl font-bold">
+              ${p["Nama"] ? p["Nama"].charAt(0) : "?"}
+            </div>
+            <h4 class="font-bold text-base leading-tight">${p["Nama"]}</h4>
+            <p class="text-[10px] text-emerald-600 uppercase font-bold tracking-widest mt-1 mb-3">${p["Jabatan"]}</p>
+            ${p["Tugas"] ? `<p class="text-xs text-slate-500 leading-relaxed border-t pt-3">${p["Tugas"]}</p>` : ""}
+          </div>
+        `,
           )
           .join("");
       }
@@ -855,10 +865,23 @@
 
       function renderKontakPanitia(kontak = []) {
         const container = document.getElementById("kontakContainer");
+        // Mencari elemen pembungkus (div yang berisi judul "Kontak Panitia")
+        const wrapper = container.parentElement;
+
         const panitiaHanya = kontak.filter(
           (k) => k["Kategori"] === "Kontak Panitia",
         );
 
+        // Sembunyikan jika tidak ada kontak dengan kategori 'Kontak Panitia'
+        if (panitiaHanya.length === 0) {
+          const donasiSection = document.getElementById("donasi");
+          donasiSection.classList.remove("md:grid-cols-2");
+          donasiSection.classList.add("grid-cols-1");
+          wrapper.classList.add("hidden");
+          return;
+        }
+
+        wrapper.classList.remove("hidden");
         container.innerHTML = panitiaHanya
           .map((k) => {
             const cleanNum = k["Kontak"].toString().replace(/[^0-9]/g, "");
